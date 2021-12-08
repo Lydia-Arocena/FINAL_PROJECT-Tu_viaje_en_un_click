@@ -1,6 +1,8 @@
 from geopy.geocoders import Nominatim
 from geopy.distance import geodesic 
 
+
+
 def get_coordenadas(city):
     """
     Esta función saca las coordenadas de la ciudad que le pases.
