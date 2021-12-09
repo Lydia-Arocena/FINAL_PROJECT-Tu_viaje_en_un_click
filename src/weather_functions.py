@@ -29,6 +29,12 @@ def get_date(x):
 
 
 def cleaning(ciudad,dias):
+    """
+    Esta función me transforma un json en df.
+    Args: ciudad (string) o coordenadas (tupla numérica)
+          dias(int del 1 al 3)
+    Return: df con las principales características metereológicas de los tres próximos días (contando hoy).
+    """
     res = Api_request(ciudad,dias)
     dicc={"Date_hours":[],"Temperature":[],"Sky":[],"Icon":[],"Will it rain?":[],"Will it snow?":[]}
     for day in range(len(res)):

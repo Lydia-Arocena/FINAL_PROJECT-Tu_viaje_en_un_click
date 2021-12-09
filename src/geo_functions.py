@@ -2,7 +2,6 @@ from geopy.geocoders import Nominatim
 from geopy.distance import geodesic 
 
 
-
 def get_coordenadas(city):
     """
     Esta función saca las coordenadas de la ciudad que le pases.
@@ -11,7 +10,19 @@ def get_coordenadas(city):
     """
     geolocator = Nominatim(user_agent="Lydia")
     location = geolocator.geocode(query=city, exactly_one=True,timeout=200)
-    return {"type": "Point", "coordinates": [location[1][0], location[1][1]]}
+    return location[1]
+
+
+
+def get_coordenadas_tipo_point(city):
+    """
+    Esta función saca las coordenadas tipo point de la ciudad que le pases.
+    Args: una ciudad (string).
+    Return: Las coordeandas tipo point de la ciudad que le paso como argumento (latitud y longitud).
+    """
+    coord= get_coordenadas(city)
+    return {"type": "Point", "coordinates": coord}
+
 
 
 def measure_distance(city1,city2):
