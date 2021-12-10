@@ -22,11 +22,13 @@ def Google_Api_request(ciudad,radio):
     parameters={"key": os.getenv("API_Google"),
             "location": f'{coord[0]}, {coord[1]}',
             "radius": radio,
-            "keyword":"restaurant"
+            "keyword":"Restaurant"
            }
     response=requests.get(url,params=parameters)
     res=response.json()
     return res
+
+
 
 
 def cleaning_rest(ciudad,radio):
@@ -46,3 +48,5 @@ def cleaning_rest(ciudad,radio):
         dicc['Longitud'].append(res['results'][i]['geometry']['location']['lng']) #lng
     restaurants=pd.DataFrame(dicc)
     return restaurants
+
+
