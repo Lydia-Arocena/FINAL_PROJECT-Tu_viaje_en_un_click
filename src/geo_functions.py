@@ -40,14 +40,6 @@ def measure_distance(city1,city2):
     return (geodesic(city1, city2).kilometers)
 
 
-def conversor_df(metros):
-    """
-    Esta función convierte metros en kms.
-    Args: metros(float).
-    Return: kms (float).
-    """
-    return metros/1000
-
 
 def geonear(city, radio):
     """
