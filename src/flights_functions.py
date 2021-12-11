@@ -1,7 +1,28 @@
 import os
 from dotenv import load_dotenv
 from amadeus import Client, ResponseError
+from amadeus import Location
 import re
+
+
+def get_IATA(airport):
+    """
+    Esta función devuelve el código IATA de un aeropuerto.
+    Args: aeropuerto(string).
+    Return: Código IATA (string de tres letras).
+    """
+    load_dotenv()
+    amadeus = Client(
+        client_id= os.getenv("API_Key"),
+        client_secret= os.getenv("API_Secret")
+    )
+    try:
+        response = amadeus.reference_data.locations.get(keyword= airport,
+                                                    subType=Location.ANY)
+        res= response.data
+        return res[0]['iataCode']
+    except ResponseError as error:
+        raise error
 
 
 def get_cheapest_price(origen,destino,fecha):
@@ -13,6 +34,8 @@ def get_cheapest_price(origen,destino,fecha):
     Return: El precio más bajo para el vuelo seleccionado.
     
     """
+    origen=get_IATA(origen)
+    destino=get_IATA(destino)
     load_dotenv()
     amadeus = Client(
         client_id= os.getenv("API_Key"),
@@ -28,7 +51,7 @@ def get_cheapest_price(origen,destino,fecha):
         for i in range(len(response.data)):
             price=response.data[i]['price']['total']
             list_prices.append(price)
-        return f"The minimun price among all available flights is {min(list_prices)} euros"
+        return min(list_prices)
     except ResponseError as error:
         return "There is not any fight for the selected date"
 
@@ -44,6 +67,8 @@ def get_min_duration(origen,destino,fecha):
     Return: La duración mínima de los vuelos disponibles según los argumentos dados.
     
     """
+    origen=get_IATA(origen)
+    destino=get_IATA(destino)
     load_dotenv()
     amadeus = Client(
         client_id= os.getenv("API_Key"),
