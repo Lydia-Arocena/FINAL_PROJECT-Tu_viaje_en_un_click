@@ -35,8 +35,8 @@ def measure_distance(city1,city2):
     Args: dos ciudades (string).
     Return: La distancia en kms entre ambas ciudades.
     """
-    city1 = get_coordenadas_tipo_point(city1)['coordinates']
-    city2 = get_coordenadas_tipo_point(city2)['coordinates']
+    city1 = get_coordenadas(city1)
+    city2 = get_coordenadas(city2)
     return (geodesic(city1, city2).kilometers)
 
 
@@ -74,7 +74,9 @@ def df_geonear(city, radio):
     """
     geo=geonear(city, radio)
     df= pd.DataFrame(geo)
-    df2=df[df["distance"] < 800]
+    df.distance=df.distance.apply([lambda x: int(x)])
+    df2=df[df["distance"] < radio]
     df2.drop(columns=["_id","location"], inplace=True)
     df3=df2.drop(df2.index[[0]])
+    df3.columns=["City", "Distance(kms)"]
     return df3
