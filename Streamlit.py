@@ -35,21 +35,15 @@ date = st.sidebar.date_input("Pick a date")
 
 Language = st.sidebar.radio("Pick a language", idomas)
 
-
-df=st.table(gf.df_geonear(city, radio))
-
-
-
 with st.spinner('Loading your dream destinations...'):
     time.sleep(5)
 st.success('Here you have our recommendations!')
 
+df=st.table(gf.df_geonear(city, radio))
 
-#st.table(df.iloc[0:5])
+#ff.get_cheapest_price(city,destino,date): segundo filtro del precio del vuelo...
 
-#if not destino:
-    #st.warning('Please, introduce a city!!')
-    #st.stop()
+
 
 
 

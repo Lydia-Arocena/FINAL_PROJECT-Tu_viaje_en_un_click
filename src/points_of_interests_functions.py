@@ -14,7 +14,9 @@ def get_points_interest(ciudad):
 )
     try:
         '''
-        What are the popular places in Barcelona (based on a geo location and a radius)
+        Esta función devuelve un lista de puntos de interés de la ciudad que le pase.
+        Args: ciudad (string).
+        Return: una lista de los puntos de interés de la ciudad dada.
         '''
         response = amadeus.reference_data.locations.points_of_interest.get(latitude=coord[0],longitude= coord[1])
         lista_points=[]
