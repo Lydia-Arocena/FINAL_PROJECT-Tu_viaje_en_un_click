@@ -58,13 +58,13 @@ def map(ciudad,radio):
     for i,row in restaurants.iterrows():
         dicc = {"location": [row["Latitud"], row["Longitud"]], "tooltip": row["Name"]}
         
-        if row["Rating"] >= 4.0:
+        if row["Rating"] >= 4.5:
             icono = Icon(color = "green",
                         prefix="fa",
                         icon="thumbs-o-up",
                         icon_color="black"
             )
-        elif row["Rating"] < 4.0 & row["Rating"]>= 2.5:
+        elif row["Rating"] < 4.5 and row["Rating"]>= 2.5:
             icono = Icon(color = "orange",
                         prefix="fa",
                         icon="hand-o-right",

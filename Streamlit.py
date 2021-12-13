@@ -8,7 +8,7 @@ import src.weather_functions as wf
 
 
 st.write ("""
-# Make your dream trip a reality just in one click!! :star:
+# Make your dream trip a reality just in one click!! 🌍
 """)
 
 st.text('''In this app you will be able to choose between some travel destinations 
@@ -39,9 +39,19 @@ with st.spinner('Loading your dream destinations...'):
     time.sleep(5)
 st.success('Here you have our recommendations!')
 
-df=st.table(gf.df_geonear(city, radio))
 
-#ff.get_cheapest_price(city,destino,date): segundo filtro del precio del vuelo...
+kms=gf.df_geonear(city, radio)
+lista_kms=list(kms.City)
+
+dest=[]
+for d in lista_kms: 
+    print(d)
+    vuelo=ff.get_cheapest_price(city,d,date)
+    dest.append(vuelo)
+
+kms["Precio vuelo"]=dest
+
+st.dataframe(kms)
 
 
 

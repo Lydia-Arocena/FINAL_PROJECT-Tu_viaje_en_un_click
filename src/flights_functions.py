@@ -35,7 +35,10 @@ def get_cheapest_price(origen,destino,fecha):
     
     """
     origen=get_IATA(origen)
-    destino=get_IATA(destino)
+    print(origen)
+    #destino=get_IATA(destino)
+    destino = "ATH"
+    print(destino)
     load_dotenv()
     amadeus = Client(
         client_id= os.getenv("API_Key"),
@@ -47,13 +50,18 @@ def get_cheapest_price(origen,destino,fecha):
             destinationLocationCode=destino,
             departureDate=fecha,
             adults=1)
+        print(response.data)
         list_prices=[]
         for i in range(len(response.data)):
             price=response.data[i]['price']['total']
             list_prices.append(price)
-        return min(list_prices)
+
     except ResponseError as error:
         return "There is not any fight for the selected date"
+    if len(list_prices)==0:
+        return "There is not any fight for the selected date:("
+    else: 
+        return min(list_prices)
 
 
 
