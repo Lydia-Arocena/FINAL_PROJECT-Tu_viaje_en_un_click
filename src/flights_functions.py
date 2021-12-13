@@ -11,18 +11,7 @@ def get_IATA(airport):
     Args: aeropuerto(string).
     Return: Código IATA (string de tres letras).
     """
-    load_dotenv()
-    amadeus = Client(
-        client_id= os.getenv("API_Key"),
-        client_secret= os.getenv("API_Secret")
-    )
-    try:
-        response = amadeus.reference_data.locations.get(keyword= airport,
-                                                    subType=Location.ANY)
-        res= response.data
-        return res[0]['iataCode']
-    except ResponseError as error:
-        raise error
+   #query mongo para saccar IATA
 
 
 def get_cheapest_price(origen,destino,fecha):
@@ -35,10 +24,8 @@ def get_cheapest_price(origen,destino,fecha):
     
     """
     origen=get_IATA(origen)
-    print(origen)
-    #destino=get_IATA(destino)
-    destino = "ATH"
-    print(destino)
+    destino=get_IATA(destino)
+
     load_dotenv()
     amadeus = Client(
         client_id= os.getenv("API_Key"),
