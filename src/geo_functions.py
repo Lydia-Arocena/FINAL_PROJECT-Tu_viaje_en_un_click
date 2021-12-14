@@ -1,6 +1,6 @@
 from geopy.geocoders import Nominatim
 from geopy.distance import geodesic 
-from pymongo import MongoClient
+
 import json
 from bson.json_util import dumps
 import pandas as pd
@@ -67,11 +67,11 @@ def geonear(city, radio):
          radio en kms (int).
     Return: lista de ciudades contenidas en el radio especificado.
     """
-    coord=get_coordenadas(city)
+    
     client = MongoClient("localhost:27017")
     db = client.get_database("Tu_viaje_ideal_en_un_click")
     coordenadas = db.get_collection("coordenadas")
-    
+    coord=get_coordenadas(city)
     query_travel=[{
     "$geoNear": {'near': list(coord[::-1]),
              'distanceField': 'distance',
@@ -95,10 +95,10 @@ def df_geonear(city, radio):
     df= pd.DataFrame(geo)
     df.distance=df.distance.apply([lambda x: int(x)])
     df2=df[df["distance"] < radio]
-    df2.drop(columns=["_id","location"], inplace=True)
-    df3=df2.drop(df2.index[[0]])
+    df2.drop(columns=["_id"], inplace=True)
+    df3=df2.drop(['IATA', 'Country', 'Location'], axis = 1)
     df3.columns=["City", "Distance(kms)"]
-    return df3
+    return df3.iloc[1:]
 
 
 def selenium_IATAS():

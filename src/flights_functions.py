@@ -3,15 +3,25 @@ from dotenv import load_dotenv
 from amadeus import Client, ResponseError
 from amadeus import Location
 import re
+from pymongo import MongoClient
 
 
-def get_IATA(airport):
+def get_IATA(city):
     """
     Esta función devuelve el código IATA de un aeropuerto.
-    Args: aeropuerto(string).
+    Args: Ciudad (string).
     Return: Código IATA (string de tres letras).
     """
-   #query mongo para saccar IATA
+    client = MongoClient("localhost:27017")
+    db = client.get_database("Tu_viaje_ideal_en_un_click")
+    c = db.get_collection("coordenadas")
+    cond={"City": city}
+    #pr={"IATA": 1,"Country":0, "_id":0, "City":1, "Location":0}
+    IATA=list(c.find(cond))
+    IATASS=[]
+    IATASS.append(IATA[0]['IATA'])
+    return IATA[0]['IATA']
+    
 
 
 def get_cheapest_price(origen,destino,fecha):
@@ -24,7 +34,8 @@ def get_cheapest_price(origen,destino,fecha):
     
     """
     origen=get_IATA(origen)
-    destino=get_IATA(destino)
+    #destino=get_IATA(destino)[0]
+    
 
     load_dotenv()
     amadeus = Client(
@@ -37,16 +48,16 @@ def get_cheapest_price(origen,destino,fecha):
             destinationLocationCode=destino,
             departureDate=fecha,
             adults=1)
-        print(response.data)
+       
         list_prices=[]
         for i in range(len(response.data)):
             price=response.data[i]['price']['total']
             list_prices.append(price)
 
     except ResponseError as error:
-        return "There is not any fight for the selected date"
+        return "There is not any flight for the selected date"
     if len(list_prices)==0:
-        return "There is not any fight for the selected date:("
+        return "There is not any flight for the selected date"
     else: 
         return min(list_prices)
 
@@ -101,3 +112,4 @@ def total_hours(total):
         return total[0]
 
    
+
