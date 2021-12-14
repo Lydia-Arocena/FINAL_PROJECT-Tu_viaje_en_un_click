@@ -19,6 +19,7 @@ from pymongo import MongoClient
 from pymongo import GEOSPHERE
 import json
 from bson.json_util import dumps
+import ast
                              
 
 
@@ -176,6 +177,13 @@ def translator(x):
         return x
     
 
+def string_dicc(x):
+    try:
+        return ast.literal_eval(x)
+    except:
+        return x
+
+
 
 def insert_Mongo():
     """
@@ -184,6 +192,7 @@ def insert_Mongo():
     client = MongoClient("localhost:27017")
     db = client.get_database("Tu_viaje_ideal_en_un_click")
     IATA=pd.read_csv("../Data/IATAcoord.csv")
-    data = IATA.to_dict(orient='records')  
+    data = IATA.to_dict(orient='records') 
+    print(data)
     coordenadas = db["coordenadas"]  
     coordenadas.insert_many(data)
