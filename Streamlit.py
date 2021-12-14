@@ -73,10 +73,10 @@ destinos["Precio vuelo(€)"]=precios #apendeo los precios
 
 destinos_filtrados=destinos[destinos["Precio vuelo(€)"]!='There is not any flight for the selected date']
 destinos_filtrados["Precio vuelo(€)"]=pd.to_numeric(destinos_filtrados["Precio vuelo(€)"], downcast="float")
-destinos_filtrados["Precio vuelo(€)"]=destinos_filtrados["Precio vuelo(€)"].apply(lambda x: round(x,2))
+#destinos_filtrados["Precio vuelo(€)"]=destinos_filtrados["Precio vuelo(€)"].apply(lambda x: round(x,2))
 destinos_filtrados=destinos_filtrados[destinos_filtrados["Precio vuelo(€)"]<budget]
-
-st.dataframe(destinos_filtrados)
+st.table(destinos_filtrados.style.format({"Precio vuelo(€)":'{:.2f}'}))
+#st.dataframe(destinos_filtrados)
 
 
 
