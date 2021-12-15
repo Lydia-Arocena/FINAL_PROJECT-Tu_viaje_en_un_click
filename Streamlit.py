@@ -13,6 +13,9 @@ from folium.plugins import HeatMap, MarkerCluster
 import streamlit as st
 from streamlit_folium import folium_static
 import streamlit.components.v1 as components
+import streamlit as st
+import pandas as pd
+import plotly.express as px
 
 
 
@@ -35,22 +38,22 @@ if not city:
     #st.warning('Please, introduce a city!!')
     st.stop()
 
-radio= st.sidebar.slider('How far would you like to travel?', 200, 10000, 200,step=100)
+radio= st.sidebar.slider('How far would you like to travel?', 200, 1000, 200,step=100)
 
 budget= st.sidebar.slider('Which is your budget?', 70, 5000, 100,step=10)
 
-idomas=["English", "Spanish", "Chinese", "Others"]
+
 
 date = st.sidebar.date_input("Pick a date")
 date2=date.strftime("%Y-%m-%d")
 
-
+idomas=["English", "Spanish", "Chinese", "Others"]
 Language = st.sidebar.radio("Pick a language", idomas)
 
 
 
 with st.spinner('Loading your dream destinations...'):
-    time.sleep(5)
+    time.sleep(10)
 st.success('Here you have our recommendations!')
 
 
@@ -84,8 +87,15 @@ destinos_filtrados=destinos[destinos["Precio vuelo(€)"]!='There is not any fli
 destinos_filtrados["Precio vuelo(€)"]=pd.to_numeric(destinos_filtrados["Precio vuelo(€)"], downcast="float")
 destinos_filtrados=destinos_filtrados[destinos_filtrados["Precio vuelo(€)"]<budget]
 destinos_filtrados=destinos_filtrados.sort_values(by=["Precio vuelo(€)"])
+destinos_filtrados=destinos_filtrados.drop_duplicates(subset=['City'])
 destinos_filtrados=destinos_filtrados.head(5)
+
+
 st.dataframe(destinos_filtrados.style.format({"Precio vuelo(€)":'{:.2f}'}))
+
+fig = px.histogram(destinos_filtrados, x="City", y="Precio vuelo(€)")
+fig.add_vline(destinos_filtrados["Precio vuelo(€)"].mean(), line_width=3, line_color="green")
+st.plotly_chart(fig)
 
 
 if destinos_filtrados.shape[0]==0:
@@ -96,28 +106,33 @@ else:
     if input_city=="Choose an option":
         pass
     else:
+        
         st.write ("""
         ### Weather forecast:
         """)
-        st.dataframe(wf.cleaning(input_city,3))
+        forecast=wf.cleaning(input_city,3)
+        forecast=forecast.drop(columns=["Dates", "Rain", "Snow"])
+        st.dataframe(forecast.style.format({"Min_temp":'{:.1f}',"Max_temp":'{:.1f}'}))
+        
+        #st.write ("""
+        ### Points of interests:
+        #""")
+        #st.dataframe(pf.get_points_interest(input_city))
+        
+
         st.write ("""
         ### Restaurant recommendations:
         """)
         restaurants=rf.cleaning_rest(input_city,10000)
-        restaurants2=st.dataframe(restaurants.drop(columns=["Latitud", "Longitud"]))
-        #points=pf.get_points_interest(input_city)
-        #if points=="Raise error":
-            #st.write("""There is not any interest points in this City""")
-        #else:
-            #st.table(points)
-        #st.table(pf.get_points_interest(input_city))
+        restaurants=restaurants.drop(columns=["Latitud", "Longitud"])
+        restaurants2=st.dataframe(restaurants.style.format({"Rating":'{:.1f}'}))
+      
 
         st.write ("""
-        ### Restaurants:
+        ### Restaurants locations map:
         """)
 
         default_value = input_city
-        user_input_dire = st.text_input("Introduce dirección", default_value)
         folium_static(rf.map(input_city,10000))
 
 

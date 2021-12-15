@@ -20,12 +20,15 @@ def get_points_interest(ciudad):
         Return: una lista de los puntos de interés de la ciudad dada.
         '''
         response = amadeus.reference_data.locations.points_of_interest.get(latitude=coord[0],longitude= coord[1])
-        #print(response)
-        lista_points=[]
+        
+        dicc={"Name":[],"Latitud":[],"Longitud":[], "Category":[]}
         for i in range(len(response.data)):
             point=response.data[i]["name"]
-            lista_points.append(point)
-        return pd.DataFrame(lista_points)
+            dicc["Name"].append(point)
+            dicc["Latitud"].append(response.data[i]["geoCode"]["latitude"])
+            dicc["Longitud"].append(response.data[i]["geoCode"]["longitude"])
+            dicc["Category"].append(response.data[i]["tags"][0])
+        return pd.DataFrame(dicc)
     except ResponseError:
         return "There are not any available point of interest"
 
