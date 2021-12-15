@@ -1,11 +1,16 @@
 import streamlit as st
 from PIL import Image
 import time
+import sys
+sys.path.append('../')
+
 import src.geo_functions as gf
 import src.flights_functions as ff
 import src.weather_functions as wf
 import src.Restaurants_functions as rf
+import src.hotels_functions as hf
 import src.points_of_interests_functions as pf
+
 import pandas as pd
 import folium
 from folium import Choropleth, Circle, Marker, Icon, Map
@@ -53,8 +58,8 @@ Language = st.sidebar.radio("Pick a language", idomas)
 
 
 with st.spinner('Loading your dream destinations...'):
-    time.sleep(10)
-st.success('Here you have our recommendations!')
+    time.sleep(60)
+st.success('Here you have our recommendations for the cheapest flights and hotels!')
 
 
 
@@ -81,20 +86,34 @@ for i in IATAS_:
     except:
         pass
 
-destinos["Precio vuelo(€)"]=precios #apendeo los precios
+destinos["Flight Price(€)"]=precios #apendeo los precios
 
-destinos_filtrados=destinos[destinos["Precio vuelo(€)"]!='There is not any flight for the selected date']
-destinos_filtrados["Precio vuelo(€)"]=pd.to_numeric(destinos_filtrados["Precio vuelo(€)"], downcast="float")
-destinos_filtrados=destinos_filtrados[destinos_filtrados["Precio vuelo(€)"]<budget]
-destinos_filtrados=destinos_filtrados.sort_values(by=["Precio vuelo(€)"])
+destinos_filtrados=destinos[destinos["Flight Price(€)"]!='There is not any flight for the selected date']
+destinos_filtrados["Flight Price(€)"]=pd.to_numeric(destinos_filtrados["Flight Price(€)"], downcast="float")
+destinos_filtrados=destinos_filtrados.sort_values(by=["Flight Price(€)"])
 destinos_filtrados=destinos_filtrados.drop_duplicates(subset=['City'])
 destinos_filtrados=destinos_filtrados.head(5)
 
+ciudades_h=list(destinos_filtrados.City)
 
-st.dataframe(destinos_filtrados.style.format({"Precio vuelo(€)":'{:.2f}'}))
 
-fig = px.histogram(destinos_filtrados, x="City", y="Precio vuelo(€)")
-fig.add_vline(destinos_filtrados["Precio vuelo(€)"].mean(), line_width=3, line_color="green")
+precio_hoteles=[]
+for x in ciudades_h:
+    barato=hf.cleaning_hotel(x,date2)
+    precio_hoteles.append(barato)
+
+
+destinos_filtrados["Hotel Price(€)"]= precio_hoteles
+pt = destinos_filtrados["Flight Price(€)"] + destinos_filtrados["Hotel Price(€)"]
+destinos_filtrados["Total Price(€)"] = pt
+destinos_filtrados=destinos_filtrados[destinos_filtrados["Total Price(€)"]<budget]
+
+
+
+st.dataframe(destinos_filtrados.style.format({"Flight Price(€)":'{:.2f}',"Hotel Price(€)":'{:.2f}',"Total Price(€)":'{:.2f}'}))
+
+fig = px.histogram(destinos_filtrados, x="City", y="Total Price(€)")
+fig.add_hline(destinos_filtrados["Total Price(€)"].mean(), line_width=3, line_color="red")
 st.plotly_chart(fig)
 
 
@@ -112,13 +131,21 @@ else:
         """)
         forecast=wf.cleaning(input_city,3)
         forecast=forecast.drop(columns=["Dates", "Rain", "Snow"])
+        #iconos=wf.dibu3(forecast)
+        forecast=forecast.drop(columns=["Icon"])
         st.dataframe(forecast.style.format({"Min_temp":'{:.1f}',"Max_temp":'{:.1f}'}))
+        #st.image(iconos, use_column_width=True)
         
-        #st.write ("""
-        ### Points of interests:
-        #""")
-        #st.dataframe(pf.get_points_interest(input_city))
         
+        
+        st.write ("""
+        ### Museums:
+        """)
+        museums=pf.cleaning_museums(input_city,10000)
+        museums=museums.drop(columns=["Latitud", "Longitud"])
+        museums2=st.dataframe(museums.style.format({"Rating":'{:.1f}'}))
+
+
 
         st.write ("""
         ### Restaurant recommendations:
@@ -127,6 +154,7 @@ else:
         restaurants=restaurants.drop(columns=["Latitud", "Longitud"])
         restaurants2=st.dataframe(restaurants.style.format({"Rating":'{:.1f}'}))
       
+
 
         st.write ("""
         ### Restaurants locations map:

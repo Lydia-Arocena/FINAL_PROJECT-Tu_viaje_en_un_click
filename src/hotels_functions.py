@@ -4,9 +4,10 @@ import os
 import json, ast
 from datetime import datetime
 from datetime import timedelta
-import geo_functions as gf
+import src.geo_functions as gf
 import pandas as pd
 
+load_dotenv()
 
 def datatime(date_str):
     dt_obj = datetime.strptime(date_str, '%m-%d-%Y').date()
@@ -16,7 +17,7 @@ def datatime(date_str):
 
 def api_request(city,date_str):
     coord=gf.get_coordenadas(city)
-    check_in=datatime(date_str)
+    check_in=datetime.strptime(date_str, '%Y-%m-%d')
     check_out=check_in + timedelta(days=1)
     in_string=check_in.strftime("%Y-%m-%d")
     out_string=check_out.strftime("%Y-%m-%d")
@@ -31,22 +32,36 @@ def api_request(city,date_str):
     return res
 
 
-def cleaning_hotel(res,city,date_str):
-    res=api_request(city,date_str)
-    dicc={"Nombre":[],"Estrellas":[],"Valoración":[],"Precio(€)":[],"Latitud":[],"Longitud":[]}
-    for i in range(len(res)):
-        dicc["Nombre"].append(res['searchResults']['results'][i]['name'])
-        dicc["Estrellas"].append(res['searchResults']['results'][i]['starRating'])
-        dicc["Valoración"].append(res['searchResults']['results'][i]['guestReviews']['rating'])
-        dicc["Precio(€)"].append(res['searchResults']['results'][i]['ratePlan']['price']['current'])
-        dicc["Latitud"].append(res['searchResults']['results'][i][ 'coordinate']['lat'])
-        dicc["Longitud"].append(res['searchResults']['results'][i][ 'coordinate']['lon'])
 
-    hotels=pd.DataFrame(dicc)
-    hotels["Precio(€)"]=hotels["Precio(€)"].apply(lambda x: x.split("€")[0])
-    hotels["Precio(€)"] = hotels["Precio(€)"].astype(int)
-    hotels["Estrellas"] = hotels["Estrellas"].astype(int)
-    return hotels
+
+
+def cleaning_hotel(city,date_str):
+    res=api_request(city,date_str)
+    dicc={"Nombre":[],"Estrellas":[],"Precio(€)":[],"Latitud":[],"Longitud":[]}
+    for i in range(len(res)):
+        try:
+            dicc["Nombre"].append(res['searchResults']['results'][i]['name'])
+            dicc["Estrellas"].append(res['searchResults']['results'][i]['starRating'])
+            #dicc["Valoración"].append(res['searchResults']['results'][i]['guestReviews']['rating'])
+            dicc["Precio(€)"].append(res['searchResults']['results'][i]['ratePlan']['price']['current'])
+            dicc["Latitud"].append(res['searchResults']['results'][i][ 'coordinate']['lat'])
+            dicc["Longitud"].append(res['searchResults']['results'][i][ 'coordinate']['lon'])
+        except: 
+            dicc["Nombre"].append("No info")
+            dicc["Estrellas"].append(0)
+            #dicc["Valoración"].append("No info")
+            dicc["Precio(€)"].append("9999 €")
+            dicc["Latitud"].append(0.0)
+            dicc["Longitud"].append(0.0)
+
+        #print(dicc)
+        hotels=pd.DataFrame(dicc)
+        hotels["Precio(€)"]=hotels["Precio(€)"].apply(lambda x: x.split("€")[0])
+        hotels["Precio(€)"] = hotels["Precio(€)"].astype(int)
+        hotels["Estrellas"] = hotels["Estrellas"].astype(int)
+        hotels = hotels.sort_values(by= "Precio(€)")
+        precio_bajo = hotels["Precio(€)"][0]
+    return precio_bajo
 
 
   

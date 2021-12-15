@@ -8,6 +8,7 @@ import sys
 sys.path.append('../')
 
 import src.geo_functions as gf
+import src.points_of_interests_functions as pf
 
 load_dotenv()
 
@@ -52,7 +53,11 @@ def cleaning_rest(ciudad,radio):
 
 
 def map(ciudad,radio):
+    """
+    Esta función me muestra en un mapa los restaurantes y los museos de una ciudad en un radio dado.
+    """
     restaurants=cleaning_rest(ciudad, radio)
+    museums=pf.cleaning_museums(ciudad, radio)
     coord=list(gf.get_coordenadas(ciudad))
     map_rest = Map(location = coord, zoom_start = 15)
     for i,row in restaurants.iterrows():
@@ -77,5 +82,29 @@ def map(ciudad,radio):
                         icon_color="black")
             
         mark = Marker(**dicc, icon=icono)
-        mark.add_to(map_rest)
+        
+        for i,row in museums.iterrows():
+            dicc2 = {"location": [row["Latitud"], row["Longitud"]], "tooltip": row["Name"]}
+
+            if row["Rating"] >= 4.5:
+                icono2 = Icon(color = "green",
+                            prefix="fa",
+                            icon="building",
+                            icon_color="black"
+                )
+            elif row["Rating"] < 4.5 and row["Rating"]>= 2.5:
+                icono2 = Icon(color = "orange",
+                            prefix="fa",
+                            icon="building",
+                            icon_color="black")
+
+            elif row["Rating"] < 2.5:
+                icono2 = Icon(color = "red",
+                            prefix="fa",
+                            icon="building",
+                            icon_color="black")
+
+            mark2 = Marker(**dicc2, icon=icono2)
+            mark.add_to(map_rest)
+            mark2.add_to(map_rest)
     return map_rest

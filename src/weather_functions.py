@@ -2,6 +2,10 @@ import requests
 import os
 from dotenv import load_dotenv
 import pandas as pd
+from PIL import Image
+import requests
+from io import BytesIO
+import matplotlib.pyplot as plt
 
 load_dotenv()
 
@@ -56,3 +60,29 @@ def cleaning(ciudad,dias):
                           'Sky': forecast.groupby("Dates")["Sky"].agg(pd.Series.mode), 
                           'Icon': forecast.groupby("Dates")["Icon"].agg(pd.Series.mode)}).reset_index()
     return result
+
+
+def dibujar(tit):
+    """
+    Esta función dibuja una imagen a partir de un titulo
+    """
+    url = f"http:{tit}"
+    response = requests.get(url)
+    img = Image.open(BytesIO(response.content))
+    return img
+
+
+
+
+def dibu3(df):
+    """
+    Esta función dibuja los 3 iconos en linea correspondientes a los 3 dias de un dataframe
+    """
+    fig = plt.figure(figsize=(5, 5))
+    
+    for i in range(1,3):
+        image=dibujar(df.Icon[i])
+        fig.add_subplot(1, 3, i)
+        plt.imshow(image)
+        plt.axis('off')
+    return plt.show()
