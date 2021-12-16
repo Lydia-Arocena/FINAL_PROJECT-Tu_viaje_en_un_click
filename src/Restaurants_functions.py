@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 import os
 from dotenv import load_dotenv
-import folium
+
 from folium import Choropleth, Circle, Marker, Icon, Map
 import sys
 sys.path.append('../')

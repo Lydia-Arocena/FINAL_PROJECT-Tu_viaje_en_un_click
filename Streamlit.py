@@ -2,6 +2,9 @@ import streamlit as st
 from PIL import Image
 import time
 import sys
+import json
+
+from streamlit import config
 sys.path.append('../')
 
 import src.geo_functions as gf
@@ -10,6 +13,7 @@ import src.weather_functions as wf
 import src.Restaurants_functions as rf
 import src.hotels_functions as hf
 import src.points_of_interests_functions as pf
+import src.divisas_functions as divf
 
 import pandas as pd
 import folium
@@ -22,32 +26,33 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+from streamlit_keplergl import keplergl_static
+from keplergl import KeplerGl
+from vuelos_config import config as con
 
 
+imagen2 = Image.open("Fotos/apaisada.png")
+st.image(imagen2, use_column_width=True)
 
-st.write ("""
-# Make your dream trip a reality just in one click!! 🌍
-""")
 
-st.text('''In this app you will be able to choose between some travel destinations 
-that best meet your needs and requirements. ''')
+st.write("""In this app you will be able to choose between some travel destinations 
+that best meet your needs and requirements. """)
 
-imagen = Image.open("mapamundi.jpg")
+
+imagen = Image.open("Fotos/mapamundi.jpg")
 st.image(imagen, use_column_width=True)
 
 
+with st.spinner('Loading your dream destinations...'):
+    time.sleep(60)
+st.success('Here you have our recommendations for the cheapest flights and hotels!')
 
+#DEFINO VARIABLES:
 city = st.sidebar.text_input('Where will you travel from?', 'Madrid')
-
-if not city:
-    #st.warning('Please, introduce a city!!')
-    st.stop()
 
 radio= st.sidebar.slider('How far would you like to travel?', 200, 1000, 200,step=100)
 
 budget= st.sidebar.slider('Which is your budget?', 70, 5000, 100,step=10)
-
-
 
 date = st.sidebar.date_input("Pick a date")
 date2=date.strftime("%Y-%m-%d")
@@ -55,14 +60,9 @@ date2=date.strftime("%Y-%m-%d")
 idomas=["English", "Spanish", "Chinese", "Others"]
 Language = st.sidebar.radio("Pick a language", idomas)
 
-
-
-with st.spinner('Loading your dream destinations...'):
-    time.sleep(60)
-st.success('Here you have our recommendations for the cheapest flights and hotels!')
-
-
-
+if not city and not radio and not budget:
+    #st.warning('Please, introduce a city!!')
+    st.stop()
 
 origen=ff.get_IATA(city)
 
@@ -92,7 +92,7 @@ destinos_filtrados=destinos[destinos["Flight Price(€)"]!='There is not any fli
 destinos_filtrados["Flight Price(€)"]=pd.to_numeric(destinos_filtrados["Flight Price(€)"], downcast="float")
 destinos_filtrados=destinos_filtrados.sort_values(by=["Flight Price(€)"])
 destinos_filtrados=destinos_filtrados.drop_duplicates(subset=['City'])
-destinos_filtrados=destinos_filtrados.head(5)
+destinos_filtrados=destinos_filtrados.head(10)
 
 ciudades_h=list(destinos_filtrados.City)
 
@@ -109,8 +109,24 @@ destinos_filtrados["Total Price(€)"] = pt
 destinos_filtrados=destinos_filtrados[destinos_filtrados["Total Price(€)"]<budget]
 
 
+#MAPA KEPLER:
+df_k=gf.df_coord(city,ciudades_h)
+
+df_k["Precio"]=[1,2,3,4,5,6,7,8,9,10] 
+print(df_k)
+
+mapk= KeplerGl(height=400, config=con)
+mapk.add_data(data=df_k,name="vuelos")
+keplergl_static(mapk)
+
+
+#DATAFRAME OPCIONES DESTINOS:
+st.write("""The cheapest options are the following 10 cities: """)
 
 st.dataframe(destinos_filtrados.style.format({"Flight Price(€)":'{:.2f}',"Hotel Price(€)":'{:.2f}',"Total Price(€)":'{:.2f}'}))
+
+#GRÁFICO DE BARRAS PRECIOS:
+st.write("""This graph shows the average price of the above destinations: """)
 
 fig = px.histogram(destinos_filtrados, x="City", y="Total Price(€)")
 fig.add_hline(destinos_filtrados["Total Price(€)"].mean(), line_width=3, line_color="red")
@@ -125,10 +141,18 @@ else:
     if input_city=="Choose an option":
         pass
     else:
+        df_div = divf.load_data()
+        pais=divf.get_country(city)
+        divisa=list(df_div[df_div["Countries"] == pais]["Abrev"])[0]
+        st.write(f"""ATENTION!! Check if you need to change your money. In {city} you will pay in {divisa} """) 
+
         
+        ### Weather forecast:
         st.write ("""
         ### Weather forecast:
         """)
+        st.write(f"""Weather forecast in {city} for the next 3 days: """) 
+
         forecast=wf.cleaning(input_city,3)
         forecast=forecast.drop(columns=["Dates", "Rain", "Snow"])
         #iconos=wf.dibu3(forecast)
@@ -141,6 +165,7 @@ else:
         st.write ("""
         ### Museums:
         """)
+        st.write(f"""Museums recommendations in {city}: """) 
         museums=pf.cleaning_museums(input_city,10000)
         museums=museums.drop(columns=["Latitud", "Longitud"])
         museums2=st.dataframe(museums.style.format({"Rating":'{:.1f}'}))
@@ -148,8 +173,9 @@ else:
 
 
         st.write ("""
-        ### Restaurant recommendations:
+        ### Restaurant:
         """)
+        st.write(f"""Restaurants recommendations in {city} ordered by rank: """) 
         restaurants=rf.cleaning_rest(input_city,10000)
         restaurants=restaurants.drop(columns=["Latitud", "Longitud"])
         restaurants2=st.dataframe(restaurants.style.format({"Rating":'{:.1f}'}))
@@ -157,9 +183,9 @@ else:
 
 
         st.write ("""
-        ### Restaurants locations map:
+        ### Restaurants & Museums locations map:
         """)
-
+        st.write(f"""Best restaurants and museums in {city} classified by reviews(green, orange and red): """)
         default_value = input_city
         folium_static(rf.map(input_city,10000))
 

@@ -4,20 +4,18 @@ from geopy.distance import geodesic
 import json
 from bson.json_util import dumps
 import pandas as pd
-import re
+
 import unicodedata
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-import time
+
 import pandas as pd
-from selenium.webdriver.support.ui import Select
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.common.keys import Keys
+
 from deep_translator import (MyMemoryTranslator)
 import pandas as pd
 from pymongo import MongoClient
 from pymongo import GEOSPHERE
-import json
+
 from bson.json_util import dumps
 import ast
                              
@@ -196,3 +194,23 @@ def insert_Mongo():
     print(data)
     coordenadas = db["coordenadas"]  
     coordenadas.insert_many(data)
+
+
+
+
+def df_coord(city,ciudades_h):
+    """
+    Esta función me devuelve un df de coordenadas de origen y destino.
+    """
+    coord=get_coordenadas(city)
+    print(coord)
+    print(type(coord))
+    dicc={"Lat Origen":[],"Lon Origen":[],"Lat Destino":[],"Lon Destino":[]}
+    city="Madrid"
+    for i in ciudades_h:
+        dicc["Lat Origen"].append(coord[0])
+        dicc["Lon Origen"].append(coord[1])
+        dicc["Lat Destino"].append(get_coordenadas(i)[0])
+        dicc["Lon Destino"].append(get_coordenadas(i)[1])
+    kepler=pd.DataFrame(dicc)
+    return kepler

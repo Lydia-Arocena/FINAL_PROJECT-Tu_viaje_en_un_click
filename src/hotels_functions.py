@@ -36,6 +36,9 @@ def api_request(city,date_str):
 
 
 def cleaning_hotel(city,date_str):
+    """
+    Esta función me devuelve el precio más bajo por noche de los hoteles de una ciudad que le paso para una fecha de check-in.
+    """
     res=api_request(city,date_str)
     dicc={"Nombre":[],"Estrellas":[],"Precio(€)":[],"Latitud":[],"Longitud":[]}
     for i in range(len(res)):
