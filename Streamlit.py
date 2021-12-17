@@ -113,7 +113,7 @@ destinos_filtrados=destinos_filtrados[destinos_filtrados["Total Price(€)"]<bud
 df_k=gf.df_coord(city,ciudades_h)
 
 df_k["Precio"]=[1,2,3,4,5,6,7,8,9,10] 
-print(df_k)
+
 
 mapk= KeplerGl(height=400, config=con)
 mapk.add_data(data=df_k,name="vuelos")
@@ -144,14 +144,14 @@ else:
         df_div = divf.load_data()
         pais=divf.get_country(city)
         divisa=list(df_div[df_div["Countries"] == pais]["Abrev"])[0]
-        st.write(f"""ATENTION!! Check if you need to change your money. In {city} you will pay in {divisa} """) 
+        st.write(f"""ATENTION!! Check if you need to change your money. In {input_city} you will pay in {divisa} """) 
 
         
         ### Weather forecast:
         st.write ("""
         ### Weather forecast:
         """)
-        st.write(f"""Weather forecast in {city} for the next 3 days: """) 
+        st.write(f"""Weather forecast in {input_city} for the next 3 days: """) 
 
         forecast=wf.cleaning(input_city,3)
         forecast=forecast.drop(columns=["Dates", "Rain", "Snow"])
@@ -165,7 +165,7 @@ else:
         st.write ("""
         ### Museums:
         """)
-        st.write(f"""Museums recommendations in {city}: """) 
+        st.write(f"""Museums recommendations in {input_city}: """) 
         museums=pf.cleaning_museums(input_city,10000)
         museums=museums.drop(columns=["Latitud", "Longitud"])
         museums2=st.dataframe(museums.style.format({"Rating":'{:.1f}'}))
@@ -175,7 +175,7 @@ else:
         st.write ("""
         ### Restaurant:
         """)
-        st.write(f"""Restaurants recommendations in {city} ordered by rank: """) 
+        st.write(f"""Restaurants recommendations in {input_city} ordered by rank: """) 
         restaurants=rf.cleaning_rest(input_city,10000)
         restaurants=restaurants.drop(columns=["Latitud", "Longitud"])
         restaurants2=st.dataframe(restaurants.style.format({"Rating":'{:.1f}'}))
@@ -185,7 +185,7 @@ else:
         st.write ("""
         ### Restaurants & Museums locations map:
         """)
-        st.write(f"""Best restaurants and museums in {city} classified by reviews(green, orange and red): """)
+        st.write(f"""Best restaurants and museums in {input_city} classified by reviews(green, orange and red): """)
         default_value = input_city
         folium_static(rf.map(input_city,10000))
 
