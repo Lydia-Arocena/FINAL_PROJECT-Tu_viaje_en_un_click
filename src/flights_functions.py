@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv
 from amadeus import Client, ResponseError
-from amadeus import Location
 import re
 from pymongo import MongoClient
 

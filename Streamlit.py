@@ -2,7 +2,7 @@ import streamlit as st
 from PIL import Image
 import time
 import sys
-import json
+
 
 from streamlit import config
 sys.path.append('../')
@@ -15,11 +15,7 @@ import src.hotels_functions as hf
 import src.points_of_interests_functions as pf
 import src.divisas_functions as divf
 
-import pandas as pd
-import folium
-from folium import Choropleth, Circle, Marker, Icon, Map
-from folium.plugins import HeatMap, MarkerCluster
-import streamlit as st
+
 from streamlit_folium import folium_static
 import streamlit.components.v1 as components
 import streamlit as st
@@ -28,7 +24,7 @@ import plotly.express as px
 
 from streamlit_keplergl import keplergl_static
 from keplergl import KeplerGl
-from vuelos_config import config as con
+from config.vuelos_config import config as con
 
 
 imagen2 = Image.open("Fotos/apaisada.png")

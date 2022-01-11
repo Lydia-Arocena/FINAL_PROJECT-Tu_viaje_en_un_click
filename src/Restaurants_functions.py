@@ -3,7 +3,7 @@ import pandas as pd
 import os
 from dotenv import load_dotenv
 
-from folium import Choropleth, Circle, Marker, Icon, Map
+from folium import  Marker, Icon, Map
 import sys
 sys.path.append('../')
 
